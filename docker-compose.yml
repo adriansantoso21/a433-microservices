@@ -1,0 +1,42 @@
+#version of the docker hub
+version: "3.7"
+
+services:
+  # create 1 service for app
+  item-app:
+    # use base image of node 14
+    image: node:14
+    #use 80 host port and 8080 container port
+    ports: 
+      - 80:8080
+    #create anc change the workdir to /app
+    working_dir: /app
+    #mount the volume from current dir in local to /app in container
+    volumes:
+      - ./:/app
+    #make sure that the item-app is running after item-db finish
+    depends_on:
+      - item-db
+    #restart when error happen
+    restart: on-failure
+    #additional environment variable
+    environment:
+      - NODE_ENV = production
+      - DB_HOST = item-db
+
+  # create 1 service for db
+  item-db:
+    # use base image of mongo 3
+    image: mongo:3
+    #use 27017 for both host port and container port
+    ports:
+      - 27017:27017
+    #mount volume from app-db to /data/db in container
+    volumes:
+      - app-db:/data/db
+    #restart when error happen
+    restart: on-failure
+
+#create volume for item-db
+volumes:
+  app-db:
